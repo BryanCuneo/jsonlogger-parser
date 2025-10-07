@@ -13,30 +13,9 @@ $num_days = 60
 $num_entries = 100
 $current_date = Get-Date
 
-function Get-RandomWithBigCount {
-    param(
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [object]$InputObject,
-
-        [Parameter(Mandatory = $true)]
-        [int]$Count
-    )
-
-    $rand_selections = @()
-    for ($i = 0; $i -lt [math]::Floor($count / $InputObject.Count); $i++) {
-        $rand_selections += (Get-Random -InputObject $InputObject -Count $InputObject.Count)
-    }
-
-    if ($count % $InputObject.Count -gt 0) {
-        $rand_selections += (Get-Random -InputObject $InputObject -Count ($count % $InputObject.Count))
-    }
-
-    return $rand_selections
-}
-
 1..$num_programs | ForEach-Object -Parallel {
-    $program_name = "Program Number $_"
+    $program_num = $_
+    $program_name = "Program Number $program_num"
 
     $folder_path = Join-Path -Path (Get-Location) -ChildPath (Join-Path -Path "ignore" -ChildPath $($program_name -replace " ", ""))
     if (-not (Test-Path -Path $folder_path -PathType Container)) {
@@ -51,6 +30,9 @@ function Get-RandomWithBigCount {
             $level = $using:weightedLevels | Get-Random
             $L.Log($level, "Test $level message")
         }
-        $L.Close("All done!")
+
+        if ($program_num % 2 -eq 0) {
+            $L.Close("All done!")
+        }
     }
 }
