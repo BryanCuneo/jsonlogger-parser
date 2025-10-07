@@ -128,7 +128,7 @@ func main() {
 
 	fmt.Printf("Found %d log entries\n", len(logEntries))
 	if finalEntry.Level != "" {
-		fmt.Printf("Final Entry: %+v\n", finalEntry)
+		fmt.Printf("Final Entry: %+v\n\n", finalEntry)
 	} else {
 		fmt.Println("No final entry in this log file")
 	}
