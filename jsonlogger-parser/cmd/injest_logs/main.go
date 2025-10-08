@@ -21,16 +21,6 @@ type Program struct {
 	log_folder_path string
 }
 
-type Session struct {
-	session_id int
-	program_id int
-}
-
-type Entry struct {
-	session_id int
-	log_entry  string
-}
-
 var dataSource = "localhost\\SQLEXPRESS"
 var initialCatalog = "ps_log_store"
 var logsRootPath = "C:\\Users\\Bryan Cuneo\\source\\jsonlogger-parser\\ignore\\sample_logs"
