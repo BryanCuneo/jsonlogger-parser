@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/joho/godotenv"
 	_ "github.com/microsoft/go-mssqldb"
@@ -20,6 +21,32 @@ type Program struct {
 	program_id      int
 	program_name    string
 	log_folder_path string
+}
+
+type PsTimestamp struct {
+	time.Time
+}
+
+func (ct *PsTimestamp) UnmarshalJSON(b []byte) error {
+	str := string(b[1 : len(b)-1]) // Trim the quotes
+	layout := "2006-01-02T15:04:05.999999999-07:00"
+	parsedTime, err := time.Parse(layout, str)
+	if err != nil {
+		return err
+	}
+	ct.Time = parsedTime
+	return nil
+}
+
+type InitialEntry struct {
+	Timestamp         PsTimestamp `json:"timestamp"`
+	Level             string      `json:"level"`
+	ProgramName       string      `json:"programName"`
+	PSVersion         string      `json:"PSVersion"`
+	JsonLoggerVersion string      `json:"jsonLoggerVersion"`
+	HasWarning        bool        `json:"hasWarning,omitempty"`
+	HasError          bool        `json:"hasError,omitempty"`
+	HasFatal          bool        `json:"hasFatal,omitempty"`
 }
 
 func archiveFile(filePath string) error {
@@ -128,8 +155,9 @@ func insertNewPrograms(db *sql.DB, path string) (int, error) {
 	return len(new_paths), nil
 }
 
-func insertLogEntry(db *sql.DB, sessionId int, logFilePath string) error {
-	query := "insert into log_entries (session_id, log_entry) values (?, ?)"
+func insertLogEntries(db *sql.DB, sessionId int, logFilePath string) error {
+	updateSessionQuery := "update log_sessions set hasWarning = ?, hasError = ?, hasFatal = ? where _id = ?"
+	logEntriesQuery := "insert into log_entries (session_id, log_entry) values (?, ?)"
 
 	file, err := os.Open(logFilePath)
 	if err != nil {
@@ -146,7 +174,10 @@ func insertLogEntry(db *sql.DB, sessionId int, logFilePath string) error {
 	if after, ok := bytes.CutPrefix(firstLine, []byte{0xEF, 0xBB, 0xBF}); ok {
 		firstLine = after
 	}
-	_, err = db.Exec(query, sessionId, string(firstLine))
+
+	//TODO Update session with hasWarning/hasError/hasFatal
+
+	_, err = db.Exec(logEntriesQuery, sessionId, string(firstLine))
 	if err != nil {
 		fmt.Println("Error inserting row: ", err.Error())
 		return err
@@ -180,7 +211,7 @@ func insertNewSession(db *sql.DB, programId int, filePath string) error {
 		return err
 	}
 
-	err = insertLogEntry(db, newSessionId, filePath)
+	err = insertLogEntries(db, newSessionId, filePath)
 	if err != nil {
 		fmt.Println("Error inserting log entry: ", err.Error())
 		return err
@@ -243,12 +274,11 @@ func insertNewLogs(db *sql.DB) error {
 func init() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Fatal("Error loading .env file: ", err.Error())
 	}
 }
 
 func main() {
-	//connectionString := fmt.Sprintf("Data Source=%s;Initial Catalog=%s;Integrated Security=True;Trust Server Certificate=True", dataSource, initialCatalog)
 	db, err := sql.Open("mssql", os.Getenv("SQL_CONN_STRING"))
 	if err != nil {
 		log.Fatal("Error connecting to database: ", err.Error())

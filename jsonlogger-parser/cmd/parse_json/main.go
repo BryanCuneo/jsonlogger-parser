@@ -32,6 +32,9 @@ type InitialEntry struct {
 	ProgramName       string      `json:"programName"`
 	PSVersion         string      `json:"PSVersion"`
 	JsonLoggerVersion string      `json:"jsonLoggerVersion"`
+	HasWarning        bool        `json:"hasWarning,omitempty"`
+	HasError          bool        `json:"hasError,omitempty"`
+	HasFatal          bool        `json:"hasFatal,omitempty"`
 }
 
 type LogEntry struct {
@@ -111,6 +114,25 @@ func main() {
 		fmt.Println("Error unmarshalling:", err)
 		return
 	}
+
+	if initialEntry.HasWarning {
+		fmt.Println("Has warnings")
+	} else {
+		fmt.Println("No warnings")
+	}
+
+	if initialEntry.HasError {
+		fmt.Println("Has errors")
+	} else {
+		fmt.Println("No errors")
+	}
+
+	if initialEntry.HasFatal {
+		fmt.Println("Has fatal error")
+	} else {
+		fmt.Println("No fatal error")
+	}
+
 	fmt.Printf("Initial Entry: %+v\n", initialEntry)
 
 	for scanner.Scan() {
