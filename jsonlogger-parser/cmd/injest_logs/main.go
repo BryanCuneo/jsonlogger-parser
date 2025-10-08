@@ -207,7 +207,7 @@ func insertNewLogs(db *sql.DB) error {
 	get_programs_query := "select _id, program_name, log_folder_path from programs"
 	programs, err := db.Query(get_programs_query)
 	if err != nil {
-		fmt.Printf("Error selecting from programs: ", err.Error())
+		fmt.Println("Error selecting from programs: ", err.Error())
 		return err
 	}
 	defer programs.Close()
