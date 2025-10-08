@@ -17,7 +17,7 @@ $current_date = Get-Date
     $program_num = $_
     $program_name = "Program Number $program_num"
 
-    $folder_path = Join-Path -Path (Get-Location) -ChildPath (Join-Path -Path "ignore" -ChildPath $($program_name -replace " ", ""))
+    $folder_path = Join-Path -Path (Get-Location) -ChildPath (Join-Path -Path "ignore\sample_logs\" -ChildPath $($program_name -replace " ", ""))
     if (-not (Test-Path -Path $folder_path -PathType Container)) {
         New-Item -Path $folder_path -ItemType Directory | Out-Null
     }
