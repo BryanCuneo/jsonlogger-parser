@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/joho/godotenv"
 	_ "github.com/microsoft/go-mssqldb"
 )
 
@@ -21,16 +22,11 @@ type Program struct {
 	log_folder_path string
 }
 
-var dataSource = "localhost\\SQLEXPRESS"
-var initialCatalog = "ps_log_store"
-var logsRootPath = "C:\\Users\\Bryan Cuneo\\source\\jsonlogger-parser\\ignore\\sample_logs"
-var logsArchivePath = "C:\\Users\\Bryan Cuneo\\source\\jsonlogger-parser\\ignore\\archive"
-
 func archiveFile(filePath string) error {
 	logFileName := filepath.Base(filePath)
 	zipFilename := strings.Replace(logFileName, filepath.Ext(logFileName), ".zip", 1)
 	parentFolder := filepath.Base(filepath.Dir(filePath))
-	zipDestination := filepath.Join(logsArchivePath, parentFolder, zipFilename)
+	zipDestination := filepath.Join(os.Getenv("ARCHIVE_PATH"), parentFolder, zipFilename)
 
 	err := os.MkdirAll(filepath.Dir(zipDestination), os.ModePerm)
 	if err != nil {
@@ -244,17 +240,23 @@ func insertNewLogs(db *sql.DB) error {
 	return err
 }
 
-func main() {
-	connectionString := fmt.Sprintf("Data Source=%s;Initial Catalog=%s;Integrated Security=True;Trust Server Certificate=True", dataSource, initialCatalog)
-
-	db, err := sql.Open("mssql", connectionString)
+func init() {
+	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error creating connection pool: ", err.Error())
+		log.Fatal("Error loading .env file")
+	}
+}
+
+func main() {
+	//connectionString := fmt.Sprintf("Data Source=%s;Initial Catalog=%s;Integrated Security=True;Trust Server Certificate=True", dataSource, initialCatalog)
+	db, err := sql.Open("mssql", os.Getenv("SQL_CONN_STRING"))
+	if err != nil {
+		log.Fatal("Error connecting to database: ", err.Error())
 	}
 	defer db.Close()
 
 	fmt.Print("Checking for new programs...")
-	newProgramsCount, err := insertNewPrograms(db, logsRootPath)
+	newProgramsCount, err := insertNewPrograms(db, os.Getenv("LOGS_PATH"))
 	if err != nil {
 		fmt.Println("Error: ", err.Error())
 	}
