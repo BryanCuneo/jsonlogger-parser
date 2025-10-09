@@ -25,12 +25,28 @@ $current_date = Get-Date
     }
 
     1..$env:TEST_DATA_NUM_DAYS | ForEach-Object {
-        $datestamp = (Get-Date $using:current_date).AddDays(-$_ + 1).ToString("yyyyMMdd")
+        $day_num = $_
+        $datestamp = (Get-Date $using:current_date).AddDays(-$day_num + 1).ToString("yyyyMMdd")
         $L = New-JsonLogger -LogFilePath (Join-Path $folder_path -ChildPath "$datestamp.log") -ProgramName $program_name -Overwrite
 
         1..$env:TEST_DATA_NUM_ENTRIES | ForEach-Object {
             $level = $using:weightedLevels | Get-Random
-            $L.Log($level, "Test $level message")
+
+            # Skip WARNING or ERROR levels for some days
+            if ( -not (
+                    ($day_num % 3 -eq 0 -and $level -like "ERROR") -or
+                    ($day_num % 5 -eq 0 -and $level -like "WARNING")
+                )) {
+                $L.Log($level, "Test $level message")
+            }
+
+            # Log("FATAL") on last log file
+            if ($program_num -eq $env:TEST_DATA_NUM_PROGRAMS -and
+                $day_num -eq $env:TEST_DATA_NUM_DAYS -and
+                $_ -eq $env:TEST_DATA_NUM_ENTRIES
+            ) {
+                $L.Log("FATAL", "End of test data creation.")
+            }
         }
 
         if ($program_num % 2 -eq 0) {

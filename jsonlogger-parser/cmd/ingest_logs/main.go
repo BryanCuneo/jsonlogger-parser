@@ -157,7 +157,7 @@ func insertNewPrograms(db *sql.DB, path string) (int, error) {
 }
 
 func insertLogEntries(db *sql.DB, sessionId int, logFilePath string) error {
-	updateSessionQuery := "update log_sessions set hasWarning = ?, hasError = ?, hasFatal = ? where _id = ?"
+	updateSessionQuery := "update log_sessions set has_warning = ?, has_error = ?, has_fatal = ? where _id = ?"
 	insertLogEntryQuery := "insert into log_entries (session_id, log_entry) values (?, ?)"
 
 	file, err := os.Open(logFilePath)
@@ -184,7 +184,7 @@ func insertLogEntries(db *sql.DB, sessionId int, logFilePath string) error {
 	}
 
 	if initialEntry.HasWarning || initialEntry.HasError || initialEntry.HasFatal {
-		_, err = db.Exec(updateSessionQuery, initialEntry.HasWarning, initialEntry.HasError, initialEntry.HasWarning, sessionId)
+		_, err = db.Exec(updateSessionQuery, initialEntry.HasWarning, initialEntry.HasError, initialEntry.HasFatal, sessionId)
 		if err != nil {
 			fmt.Println("Error updating session")
 			return err

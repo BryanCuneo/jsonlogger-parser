@@ -16,19 +16,22 @@ create table programs(
 );
 
 create table log_sessions(
-    _id          bigint primary key identity,
-    program_id   bigint not null,
-    created_date date   default getdate(),
-    is_archived  bit    null,
+    _id           bigint primary key identity,
+    program_id    bigint not null,
+    has_warning   bit    null,
+    has_error     bit    null,
+    has_fatal     bit    null,
+    created_date  date   default getdate(),
+    is_archived   bit    null,
 
     constraint fk_program_id foreign key (program_id)
         references programs(_id)
 );
 
 create table log_entries(
-    _id        bigint        primary key identity,
-    session_id bigint        not null,
-    log_entry  nvarchar(max) not null,
+    _id        bigint         primary key identity,
+    session_id bigint         not null,
+    log_entry  nvarchar(4000) not null,
 
     level as json_value([log_entry], '$.level'),
     index ix_level (level),
