@@ -1,4 +1,4 @@
-Import-Module ps-jsonlogger
+Import-Module ps-jsonlogger -Force
 
 $weightedLevels = @(
     "INFO", "INFO", "INFO", "INFO", "INFO",

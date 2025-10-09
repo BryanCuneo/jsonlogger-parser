@@ -18,11 +18,11 @@ create table programs(
 create table log_sessions(
     _id           bigint primary key identity,
     program_id    bigint not null,
-    has_warning   bit    null,
-    has_error     bit    null,
-    has_fatal     bit    null,
+    has_warning   bit    not null default 0,
+    has_error     bit    not null default 0,
+    has_fatal     bit    not null default 0,
     created_date  date   default getdate(),
-    is_archived   bit    null,
+    is_archived   bit    not null default 0,
 
     constraint fk_program_id foreign key (program_id)
         references programs(_id)
