@@ -5,6 +5,7 @@ import (
 	"bufio"
 	"bytes"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -157,7 +158,7 @@ func insertNewPrograms(db *sql.DB, path string) (int, error) {
 
 func insertLogEntries(db *sql.DB, sessionId int, logFilePath string) error {
 	updateSessionQuery := "update log_sessions set hasWarning = ?, hasError = ?, hasFatal = ? where _id = ?"
-	logEntriesQuery := "insert into log_entries (session_id, log_entry) values (?, ?)"
+	insertLogEntryQuery := "insert into log_entries (session_id, log_entry) values (?, ?)"
 
 	file, err := os.Open(logFilePath)
 	if err != nil {
@@ -176,25 +177,38 @@ func insertLogEntries(db *sql.DB, sessionId int, logFilePath string) error {
 	}
 
 	//TODO Update session with hasWarning/hasError/hasFatal
+	var initialEntry InitialEntry
+	if err := json.Unmarshal(firstLine, &initialEntry); err != nil {
+		fmt.Println("Error unmarshalling initial entry")
+		return err
+	}
 
-	_, err = db.Exec(logEntriesQuery, sessionId, string(firstLine))
+	if initialEntry.HasWarning || initialEntry.HasError || initialEntry.HasFatal {
+		_, err = db.Exec(updateSessionQuery, initialEntry.HasWarning, initialEntry.HasError, initialEntry.HasWarning, sessionId)
+		if err != nil {
+			fmt.Println("Error updating session")
+			return err
+		}
+	}
+
+	_, err = db.Exec(insertLogEntryQuery, sessionId, string(firstLine))
 	if err != nil {
-		fmt.Println("Error inserting row: ", err.Error())
+		fmt.Println("Error inserting initial log entry: ", string(firstLine))
 		return err
 	}
 	// Insert the rest of the log entries
 	for scanner.Scan() {
 		line := scanner.Text()
 
-		_, err := db.Exec(query, sessionId, line)
+		_, err := db.Exec(insertLogEntryQuery, sessionId, line)
 		if err != nil {
-			fmt.Println("Error inserting row: ", err.Error())
+			fmt.Println("Error inserting log entry: ", line)
 			return err
 		}
 	}
 
 	if err := scanner.Err(); err != nil {
-		fmt.Println("Error scanning file: ", err.Error())
+		fmt.Println("Error scanning file: ", logFilePath)
 		return err
 	}
 
