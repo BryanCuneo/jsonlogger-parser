@@ -132,6 +132,10 @@ func insertNewPrograms(db *sql.DB, path string) (int, error) {
 	}
 	defer rows.Close()
 
+	if err = db.Ping(); err != nil {
+		log.Fatal("Database is not reachable: ", err)
+	}
+
 	var value string
 	for rows.Next() {
 		err = rows.Scan(&value)
