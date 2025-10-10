@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -12,8 +13,8 @@ import (
 )
 
 type Program struct {
-	id              int64
-	name            string
+	ID              int64
+	Name            string
 	log_folder_path string
 	archive_days    int16
 	delete_days     int16
@@ -28,12 +29,6 @@ type Session struct {
 	created_date time.Time
 	is_archived  bool
 }
-
-// var ValidTableNames = map[string]struct{}{
-// 	"log_entries":  {},
-// 	"log_sessions": {},
-// 	"programs":     {},
-// }
 
 func connectDB() (*sql.DB, error) {
 	db, err := sql.Open("mssql", os.Getenv("SQL_CONN_STRING"))
@@ -55,7 +50,7 @@ func getPrograms(db *sql.DB) ([]Program, error) {
 	for rows.Next() {
 		var prog Program
 		if err := rows.Scan(
-			&prog.id, &prog.name, &prog.log_folder_path,
+			&prog.ID, &prog.Name, &prog.log_folder_path,
 			&prog.archive_days, &prog.delete_days); err != nil {
 			return nil, err
 		}
@@ -65,101 +60,26 @@ func getPrograms(db *sql.DB) ([]Program, error) {
 	return programs, nil
 }
 
-func getSessions(db *sql.DB) ([]Session, error) {
-	sessionsQuery := "select * from log_sessions"
-	rows, err := db.Query(sessionsQuery)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var sessions []Session
-	for rows.Next() {
-		var sesh Session
-		if err := rows.Scan(
-			&sesh.id, &sesh.program_id, &sesh.has_warning, &sesh.has_error,
-			&sesh.has_fatal, &sesh.created_date, &sesh.is_archived); err != nil {
-			return nil, err
-		}
-		sessions = append(sessions, sesh)
-	}
-
-	return sessions, nil
-}
-
-// func scanRowsToStruct[T any](rows *sql.Rows, item *T) error {
-
-// 	columns, err := rows.Columns()
+// func getSessions(db *sql.DB) ([]Session, error) {
+// 	sessionsQuery := "select * from log_sessions"
+// 	rows, err := db.Query(sessionsQuery)
 // 	if err != nil {
-// 		return err
-// 	}
-
-// 	values := make([]any, len(columns))
-// 	for i := range values {
-// 		values[i] = new(sql.NullString)
-// 	}
-// 	if err := rows.Scan(values...); err != nil {
-// 		return err
-// 	}
-
-// 	v := reflect.ValueOf(item).Elem()
-// 	for i, col := range columns {
-// 		field := v.FieldByName(col)
-// 		if field.IsValid() && field.CanSet() {
-// 			value := reflect.ValueOf(values[i]).Elem()
-
-// 			if sqlValue, ok := value.Interface().(driver.Valuer); ok {
-// 				val, err := sqlValue.Value()
-// 				if err == nil && val != nil {
-// 					field.Set(reflect.ValueOf(val))
-// 				}
-// 			}
-// 		}
-// 	}
-
-// 	return nil
-
-// 	// scanValues := make(T, value.NumField())
-// 	// for i := range scanValues {
-// 	// 	scanValues[i] = value.Field(i).Addr().Interface()
-// 	// }
-
-// 	// if err := rows.Scan(scanValues...); err != nil {
-// 	// 	return err
-// 	// }
-
-// 	// return nil
-// }
-
-// func selectAllFromTable[T any](db *sql.DB, tableName string) ([]T, error) {
-// 	if _, ok := ValidTableNames[tableName]; !ok {
-// 		//return reflect.Zero(reflect.SliceOf(itemType)),
-// 		return nil,
-// 			errors.New(fmt.Sprintf("'%s' is not a valid table name", tableName))
-// 	}
-// 	programsQuery := fmt.Sprintf("select * from %s", tableName)
-
-// 	rows, err := db.Query(programsQuery)
-// 	if err != nil {
-// 		//return reflect.Zero(reflect.SliceOf(itemType)), err
 // 		return nil, err
 // 	}
 // 	defer rows.Close()
 
-// 	//var items = reflect.MakeSlice(reflect.SliceOf(itemType), 0, 0)
-// 	items := reflect.MakeSlice(reflect.SliceOf(reflect.TypeOf((*T)(nil)).Elem()), 0, 0)
-// 	log.Println("made slice")
+// 	var sessions []Session
 // 	for rows.Next() {
-// 		var item reflect.Value
-// 		if err := scanRowsToStruct(rows, items.Interface()); err != nil {
-// 			log.Println("Unable to parse row")
-// 			//return reflect.Zero(reflect.SliceOf(itemType)), err
+// 		var sesh Session
+// 		if err := rows.Scan(
+// 			&sesh.id, &sesh.program_id, &sesh.has_warning, &sesh.has_error,
+// 			&sesh.has_fatal, &sesh.created_date, &sesh.is_archived); err != nil {
 // 			return nil, err
 // 		}
-// 		items = reflect.Append(items, item)
+// 		sessions = append(sessions, sesh)
 // 	}
 
-// 	return items.Interface().([]T), nil
+// 	return sessions, nil
 // }
 
 func init() {
@@ -171,21 +91,21 @@ func init() {
 
 func main() {
 
-	// programs, err := getPrograms(db)
-	// if err != nil {
-	// 	log.Println("Error getting programs: ", err.Error())
-	// } else {
-	// 	fmt.Printf("%+v\n\n", programs)
-	// }
+	db, err := connectDB()
+	if err != nil {
+		log.Println("Error connecting to DB: ", err.Error())
+	}
+	defer db.Close()
 
-	// sessions, err := getSessions(db)
-	// if err != nil {
-	// 	log.Println("Error getting sessions: ", err.Error())
-	// } else {
-	// 	fmt.Printf("%+v\n\n", sessions)
-	// }
+	programs, err := getPrograms(db)
+	if err != nil {
+		log.Fatal("Unable to connect to DB: ", err.Error())
+
+	}
+	fmt.Printf("%+v", programs)
 
 	http.HandleFunc("/", BaseHandler)
 	http.HandleFunc("/programs", ProgramsHandler)
+
 	log.Fatal(http.ListenAndServe(":8000", nil))
 }

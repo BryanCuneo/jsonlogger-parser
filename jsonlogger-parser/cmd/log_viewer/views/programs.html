@@ -1,0 +1,9 @@
+{{define "content"}}
+<ul>
+    {{range .}}
+    <li>ID: {{.ID}}, Name: {{.Name}}</li>
+    {{else}}
+    <li>No programs found.</li>
+    {{end}}
+</ul>
+{{end}}
