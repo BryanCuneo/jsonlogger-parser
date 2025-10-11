@@ -1,12 +1,10 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 	"text/template"
 )
-
-//var tmpl *template.Template
 
 func BaseHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("./cmd/log_viewer/views/_base.html"))
@@ -17,24 +15,33 @@ func BaseHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ProgramsHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("ProgramsHandler")
 	db, err := connectDB()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 	defer db.Close()
-	fmt.Println("Connected to DB")
 
-	fmt.Print("Getting SQL items")
 	programs, err := getPrograms(db)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
-	fmt.Printf("%+v", programs)
 
-	tmpl := template.Must(template.ParseFiles("./cmd/log_viewer/views/programs.html"))
+	// Parse both base and programs templates
+	tmpl, err := template.ParseFiles(
+		"./cmd/log_viewer/views/_base.html",
+		"./cmd/log_viewer/views/programs.html",
+	)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err.Error())
+		return
+	}
 
-	if err := tmpl.Execute(w, programs); err != nil {
+	// Execute the base template with the "content" block from programs template
+	if err := tmpl.ExecuteTemplate(w, "content", programs); err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }

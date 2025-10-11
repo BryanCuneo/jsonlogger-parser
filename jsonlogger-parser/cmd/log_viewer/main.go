@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -15,9 +14,9 @@ import (
 type Program struct {
 	ID              int64
 	Name            string
-	log_folder_path string
-	archive_days    int16
-	delete_days     int16
+	Log_folder_path string
+	Archive_days    int16
+	Delete_days     int16
 }
 
 type Session struct {
@@ -50,8 +49,8 @@ func getPrograms(db *sql.DB) ([]Program, error) {
 	for rows.Next() {
 		var prog Program
 		if err := rows.Scan(
-			&prog.ID, &prog.Name, &prog.log_folder_path,
-			&prog.archive_days, &prog.delete_days); err != nil {
+			&prog.ID, &prog.Name, &prog.Log_folder_path,
+			&prog.Archive_days, &prog.Delete_days); err != nil {
 			return nil, err
 		}
 		programs = append(programs, prog)
@@ -90,19 +89,18 @@ func init() {
 }
 
 func main() {
+	// db, err := connectDB()
+	// if err != nil {
+	// 	log.Println("Error connecting to DB: ", err.Error())
+	// }
+	// defer db.Close()
 
-	db, err := connectDB()
-	if err != nil {
-		log.Println("Error connecting to DB: ", err.Error())
-	}
-	defer db.Close()
+	// programs, err := getPrograms(db)
+	// if err != nil {
+	// 	log.Fatal("Unable to connect to DB: ", err.Error())
 
-	programs, err := getPrograms(db)
-	if err != nil {
-		log.Fatal("Unable to connect to DB: ", err.Error())
-
-	}
-	fmt.Printf("%+v", programs)
+	// }
+	// fmt.Printf("%+v", programs)
 
 	http.HandleFunc("/", BaseHandler)
 	http.HandleFunc("/programs", ProgramsHandler)

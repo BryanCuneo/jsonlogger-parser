@@ -12,6 +12,7 @@
     <h1>Programs</h1>
     <button hx-get="/programs" hx-target="#programList" hx-swap="innerHTML">Load Programs</button>
     <div id="programList"></div>
+    {{block "content" .}}{{end}}
 </body>
 
 </html>

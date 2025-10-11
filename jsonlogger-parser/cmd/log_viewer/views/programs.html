@@ -1,7 +1,8 @@
 {{define "content"}}
 <ul>
     {{range .}}
-    <li>ID: {{.ID}}, Name: {{.Name}}</li>
+    <li>ID: {{.ID}}, Name: {{.Name}} Location: {{ .Log_folder_path }} Archive After {{ .Archive_days }} Delete After {{
+        .Delete_days }}</li>
     {{else}}
     <li>No programs found.</li>
     {{end}}
