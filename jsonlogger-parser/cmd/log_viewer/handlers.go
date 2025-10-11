@@ -40,7 +40,45 @@ func ProgramsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Execute the base template with the "content" block from programs template
-	if err := tmpl.ExecuteTemplate(w, "content", programs); err != nil {
+	if err := tmpl.ExecuteTemplate(w, "programs", programs); err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func SessionsHandler(w http.ResponseWriter, r *http.Request) {
+	db, err := connectDB()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+
+	// session, err := getSession(db, r.PathValue("slug"))
+	// if err != nil {
+	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+	// 	return
+	// }
+
+	sessions, err := getSessions(db, r.PathValue("slug"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	tmpl, err := template.ParseFiles(
+		"./cmd/log_viewer/views/_base.html",
+		"./cmd/log_viewer/views/session.html",
+	)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err.Error())
+		return
+	}
+
+	// Execute the base template with the "content" block from programs template
+	if err := tmpl.ExecuteTemplate(w, "content", sessions); err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}

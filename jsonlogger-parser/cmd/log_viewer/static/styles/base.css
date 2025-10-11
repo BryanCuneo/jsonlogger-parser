@@ -1,0 +1,29 @@
+body {
+    padding: 0;
+    margin: 0;
+    background-attachment: fixed;
+    background-image: linear-gradient(to bottom right, indigo, violet);
+    height: 100vh;
+    display: flex;
+    flex-direction: row;
+}
+
+.sidebar {
+    background-color: white;
+    width: 200px;
+    height: 100vh;
+    padding: 10px;
+    flex-direction: left;
+}
+
+table,
+th,
+td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    padding: 6px;
+}

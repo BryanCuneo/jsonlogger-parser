@@ -1,8 +1,7 @@
-{{define "content"}}
+{{define "programs"}}
 <ul>
     {{range .}}
-    <li>ID: {{.ID}}, Name: {{.Name}} Location: {{ .Log_folder_path }} Archive After {{ .Archive_days }} Delete After {{
-        .Delete_days }}</li>
+    <li><button hx-get="/programs/{{.ID}}" hx-target="#main-content" hx-swap="innerHTML">{{.Name}}</button></li>
     {{else}}
     <li>No programs found.</li>
     {{end}}

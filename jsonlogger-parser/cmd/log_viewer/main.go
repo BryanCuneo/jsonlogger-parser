@@ -20,13 +20,13 @@ type Program struct {
 }
 
 type Session struct {
-	id           int64
-	program_id   int64
-	has_warning  bool
-	has_error    bool
-	has_fatal    bool
-	created_date time.Time
-	is_archived  bool
+	Id           int64
+	Program_id   int64
+	Has_warning  bool
+	Has_error    bool
+	Has_fatal    bool
+	Created_date time.Time
+	Is_archived  bool
 }
 
 func connectDB() (*sql.DB, error) {
@@ -38,7 +38,7 @@ func connectDB() (*sql.DB, error) {
 }
 
 func getPrograms(db *sql.DB) ([]Program, error) {
-	programsQuery := "select * from programs"
+	programsQuery := "select * from programs order by program_name"
 	rows, err := db.Query(programsQuery)
 	if err != nil {
 		return nil, err
@@ -59,26 +59,51 @@ func getPrograms(db *sql.DB) ([]Program, error) {
 	return programs, nil
 }
 
-// func getSessions(db *sql.DB) ([]Session, error) {
-// 	sessionsQuery := "select * from log_sessions"
-// 	rows, err := db.Query(sessionsQuery)
+func getSessions(db *sql.DB, programID string) ([]Session, error) {
+	sessionsQuery := "select * from log_sessions where program_id = ? order by created_date desc"
+	rows, err := db.Query(sessionsQuery, programID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var sessions []Session
+	for rows.Next() {
+		var sesh Session
+		if err := rows.Scan(
+			&sesh.Id, &sesh.Program_id, &sesh.Has_warning, &sesh.Has_error,
+			&sesh.Has_fatal, &sesh.Created_date, &sesh.Is_archived); err != nil {
+			return nil, err
+		}
+		sessions = append(sessions, sesh)
+	}
+
+	return sessions, nil
+}
+
+// func getSession(db *sql.DB, programID string) (Session, error) {
+// 	sessionsQuery := "select top(1) * from log_sessions where program_id = ?"
+// 	rows, err := db.Query(sessionsQuery, programID)
 // 	if err != nil {
-// 		return nil, err
+// 		return Session{}, err
 // 	}
 // 	defer rows.Close()
 
-// 	var sessions []Session
+// 	var session Session
 // 	for rows.Next() {
-// 		var sesh Session
 // 		if err := rows.Scan(
-// 			&sesh.id, &sesh.program_id, &sesh.has_warning, &sesh.has_error,
-// 			&sesh.has_fatal, &sesh.created_date, &sesh.is_archived); err != nil {
-// 			return nil, err
+// 			&session.Id, &session.Program_id, &session.Has_warning, &session.Has_error,
+// 			&session.Has_fatal, &session.Created_date, &session.Is_archived); err != nil {
+// 			return Session{}, err
 // 		}
-// 		sessions = append(sessions, sesh)
 // 	}
 
-// 	return sessions, nil
+// 	// If no session found, return an error
+// 	if session.Id == 0 {
+// 		return Session{}, err
+// 	}
+
+// 	return session, nil
 // }
 
 func init() {
@@ -89,21 +114,12 @@ func init() {
 }
 
 func main() {
-	// db, err := connectDB()
-	// if err != nil {
-	// 	log.Println("Error connecting to DB: ", err.Error())
-	// }
-	// defer db.Close()
-
-	// programs, err := getPrograms(db)
-	// if err != nil {
-	// 	log.Fatal("Unable to connect to DB: ", err.Error())
-
-	// }
-	// fmt.Printf("%+v", programs)
+	// Handle static files
+	http.Handle("/stylesheets/", http.StripPrefix("/stylesheets/", http.FileServer(http.Dir("cmd/log_viewer/static/styles"))))
 
 	http.HandleFunc("/", BaseHandler)
 	http.HandleFunc("/programs", ProgramsHandler)
+	http.HandleFunc("/programs/{slug}", SessionsHandler)
 
 	log.Fatal(http.ListenAndServe(":8000", nil))
 }
