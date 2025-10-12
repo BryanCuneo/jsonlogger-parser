@@ -2,7 +2,7 @@
 {{range .}}
 <button
     class="session-button {{ if .Has_warning }}has-warning{{ end }} {{ if .Has_error }}has-error{{ end }} {{ if .Has_fatal }}has-fatal{{ end }}">{{
-    .Id }} - {{ .Created_date }} - Has Warning: {{ .Has_warning }} - Has_error: {{ .Has_error }} - Has fatal: {{
+    .Id }} - {{ .Created_date }} - Has warning: {{ .Has_warning }} - Has error: {{ .Has_error }} - Has fatal: {{
     .Has_fatal }}
 </button>
 {{else}}
