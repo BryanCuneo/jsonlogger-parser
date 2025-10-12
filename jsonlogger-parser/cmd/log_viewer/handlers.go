@@ -28,7 +28,6 @@ func ProgramsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parse both base and programs templates
 	tmpl, err := template.ParseFiles(
 		"./cmd/log_viewer/views/_base.html",
 		"./cmd/log_viewer/views/programs.html",
@@ -39,7 +38,6 @@ func ProgramsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Execute the base template with the "content" block from programs template
 	if err := tmpl.ExecuteTemplate(w, "programs", programs); err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -54,12 +52,6 @@ func SessionsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	// session, err := getSession(db, r.PathValue("slug"))
-	// if err != nil {
-	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-	// 	return
-	// }
-
 	sessions, err := getSessions(db, r.PathValue("slug"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -68,7 +60,7 @@ func SessionsHandler(w http.ResponseWriter, r *http.Request) {
 
 	tmpl, err := template.ParseFiles(
 		"./cmd/log_viewer/views/_base.html",
-		"./cmd/log_viewer/views/session.html",
+		"./cmd/log_viewer/views/sessions.html",
 	)
 
 	if err != nil {

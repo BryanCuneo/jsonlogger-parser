@@ -27,7 +27,9 @@ $current_date = Get-Date
     1..$env:TEST_DATA_NUM_DAYS | ForEach-Object {
         $day_num = $_
         $datestamp = (Get-Date $using:current_date).AddDays(-$day_num + 1).ToString("yyyyMMdd")
-        $L = New-JsonLogger -LogFilePath (Join-Path $folder_path -ChildPath "$datestamp.log") -ProgramName $program_name -Overwrite
+        $log_file_path = Join-Path $folder_path "$datestamp.log"
+        $L = New-JsonLogger -LogFilePath $log_file_path -ProgramName $program_name -Overwrite
+        (Get-ChildItem -Path $log_file_path).CreationTime = (Get-Date).AddDays(-$day_num + 1)
 
         1..$env:TEST_DATA_NUM_ENTRIES | ForEach-Object {
             $level = $using:weightedLevels | Get-Random

@@ -1,9 +1,8 @@
 {{define "programs"}}
-<ul>
-    {{range .}}
-    <li><button hx-get="/programs/{{.ID}}" hx-target="#main-content" hx-swap="innerHTML">{{.Name}}</button></li>
-    {{else}}
-    <li>No programs found.</li>
-    {{end}}
+{{range .}}
+<button class="nav-button" hx-get="/programs/{{.ID}}" hx-target="#main-content" hx-swap="innerHTML">{{.Name}}</button>
+{{else}}
+No programs found.
+{{end}}
 </ul>
 {{end}}

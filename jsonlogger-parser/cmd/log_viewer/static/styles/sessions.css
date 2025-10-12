@@ -1,0 +1,30 @@
+.session-button {
+    width: 100%;
+    text-align: center;
+    border: 1px solid transparent;
+    background-color: #96b549;
+    color: inherit;
+    padding: 10px 12px;
+    font-size: 18px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.session-button:hover {
+    background: rgba(223, 242, 246, 0.1);
+    box-shadow: inset 3px 0 0 0 #dff2f6;
+    border: 1px solid #dff2f6;
+}
+
+.session-button.has-warning {
+    background-color: #f7955a;
+}
+
+.session-button.has-error {
+    background-color: #f08080;
+}
+
+.session-button.has-fatal {
+    /* background-color: #014f76; */
+    background-color: #8B0000;
+}

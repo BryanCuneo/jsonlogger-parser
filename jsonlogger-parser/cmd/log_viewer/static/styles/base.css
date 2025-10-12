@@ -2,18 +2,15 @@ body {
     padding: 0;
     margin: 0;
     background-attachment: fixed;
-    background-image: linear-gradient(to bottom right, indigo, violet);
-    height: 100vh;
+    background-image: linear-gradient(to bottom right, #9ab7c4, #dff2f6);
     display: flex;
     flex-direction: row;
+    height: 100dvh;
+    width: 100dvw;
 }
 
-.sidebar {
-    background-color: white;
-    width: 200px;
-    height: 100vh;
-    padding: 10px;
-    flex-direction: left;
+#main-content {
+    flex: 1 1 auto;
 }
 
 table,

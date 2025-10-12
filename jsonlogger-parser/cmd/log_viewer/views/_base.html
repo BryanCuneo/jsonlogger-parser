@@ -8,12 +8,14 @@
     <title>Lincoln Log Viewer</title>
 
     <link rel="stylesheet" href="/stylesheets/base.css">
+    <link rel="stylesheet" href="/stylesheets/sidebar.css">
+    <link rel="stylesheet" href="/stylesheets/sessions.css">
     <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.7/dist/htmx.min.js"></script>
 </head>
 
 <body>
     <aside class="sidebar">
-        <nav hx-get="/programs" hx-trigger="load delay:100ms" hx-target="this" hx-swap="innerHTML">
+        <nav class="fixed" hx-get="/programs" hx-trigger="load delay:100ms" hx-target="this" hx-swap="innerHTML">
             {{block "programs" .}}{{end}}
         </nav>
     </aside>

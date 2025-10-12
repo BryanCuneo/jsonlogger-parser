@@ -1,0 +1,41 @@
+.sidebar {
+    flex: 0 0 200px;
+    color: #dff2f6;
+    width: 200px;
+    height: 100dvh;
+    overflow-x: hidden;
+}
+
+.sidebar .fixed {
+    position: fixed;
+    top: 0;
+    background: #0788ca;
+    height: inherit;
+    width: inherit
+}
+
+.sidebar .nav-button {
+    width: 100%;
+    text-align: left;
+    border: 1px solid transparent;
+    background: transparent;
+    color: inherit;
+    padding: 10px 12px;
+    font-size: 18px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.sidebar .nav-button:hover {
+    background: rgba(223, 242, 246, 0.1);
+    box-shadow: inset 3px 0 0 0 #dff2f6;
+    border: 1px solid #dff2f6;
+}
+
+/* .sidebar .bottom-btn {
+    color: inherit;
+    border: none;
+    background: transparent;
+    font-size: 18px;
+    cursor: pointer;
+} */

@@ -11,7 +11,9 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -220,10 +222,23 @@ func insertLogEntries(db *sql.DB, sessionId int, logFilePath string) error {
 }
 
 func insertNewSession(db *sql.DB, programId int, filePath string) error {
-	query := "insert into log_sessions (program_id) output inserted._id values (?)"
+	query := "insert into log_sessions (program_id, created_date) output inserted._id values (?, ?)"
+	var createdDate time.Time
+
+	switch {
+	case runtime.GOOS == "windows":
+		fileInfo, err := os.Stat(filePath)
+		if err != nil {
+			return err
+		}
+		winInfo := fileInfo.Sys().(*syscall.Win32FileAttributeData)
+		createdDate = time.Unix(0, winInfo.CreationTime.Nanoseconds())
+	default:
+		createdDate = time.Now()
+	}
 
 	var newSessionId int
-	err := db.QueryRow(query, programId).Scan(&newSessionId)
+	err := db.QueryRow(query, programId, createdDate).Scan(&newSessionId)
 	if err != nil {
 		fmt.Print("Error scanning row: ", err.Error())
 		return err
@@ -302,6 +317,10 @@ func main() {
 		log.Fatal("Error connecting to database: ", err.Error())
 	}
 	defer db.Close()
+	err = db.Ping()
+	if err != nil {
+		log.Fatal("Database is not reachable: ", err)
+	}
 
 	fmt.Print("Checking for new programs...")
 	newProgramsCount, err := insertNewPrograms(db, os.Getenv("LOGS_PATH"))
@@ -316,4 +335,6 @@ func main() {
 	}
 
 	fmt.Println("\nAll done")
+
+	db.Close()
 }

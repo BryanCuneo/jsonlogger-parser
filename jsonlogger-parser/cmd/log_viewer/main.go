@@ -60,7 +60,7 @@ func getPrograms(db *sql.DB) ([]Program, error) {
 }
 
 func getSessions(db *sql.DB, programID string) ([]Session, error) {
-	sessionsQuery := "select * from log_sessions where program_id = ? order by created_date desc"
+	sessionsQuery := "select * from log_sessions where program_id = ? and is_archived = 0 order by created_date desc"
 	rows, err := db.Query(sessionsQuery, programID)
 	if err != nil {
 		return nil, err
@@ -121,5 +121,5 @@ func main() {
 	http.HandleFunc("/programs", ProgramsHandler)
 	http.HandleFunc("/programs/{slug}", SessionsHandler)
 
-	log.Fatal(http.ListenAndServe(":8000", nil))
+	log.Fatal(http.ListenAndServe("localhost:8000", nil))
 }
